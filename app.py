@@ -84,4 +84,8 @@ def predict_premium(data: UserInput):
     prediction = model.predict(input_df)[0] #model.predict() always returns an array, even if you predict for one row.arr[high]
     
 
-    return JSONResponse(status_code=200, content={'predicted_category': prediction})
+    return {
+            "response": {
+                "predicted_category": prediction
+            }
+        }
