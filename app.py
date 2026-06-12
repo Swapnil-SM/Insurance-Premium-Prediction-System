@@ -6,8 +6,10 @@ import pickle
 import pandas as pd
 
 # import the ml model
-with open('model/model.pkl', 'rb') as f:
+with open('model.pkl', 'rb') as f:
     model = pickle.load(f)
+
+MODEL_VERSION = "1.0"
 
 app = FastAPI()  #You are using @app.get and @app.post throughout your code. These tools belong to the app object.
 
@@ -30,7 +32,7 @@ class UserInput(BaseModel):
     income_lpa: Annotated[float, Field(..., gt=0, description='Annual salary of the user in lpa')]
     smoker: Annotated[bool, Field(..., description='Is user a smoker')]
     city: Annotated[str, Field(..., description='The city that the user belongs to')]
-    occupation: Annotated[Literal['retired', 'freelancer', 'student', 'government_job',
+    occupation: Annotated[Literal['retired', 'freelancer', 'student', 'government_job',  #df["occupation"].unique() to get unique val
        'business_owner', 'unemployed', 'private_job'], Field(..., description='Occupation of the user')]
     
 
@@ -76,6 +78,20 @@ class UserInput(BaseModel):
             return 2
         else:
             return 3
+        
+# Human Readable 
+@app.get('/')
+def home ():
+    return JSONResponse(content={"message": "Welcome to the Insurance Premium Prediction API. Use the /predict endpoint to get predictions."})
+@app.get('/health')
+
+# Health Check Endpoint for monitoring and debugging purposes. It can be used by load balancers or monitoring tools to check if the API is up and running. It simply returns a JSON response indicating that the API is healthy.
+def health_check():
+    return {
+        'status': 'healthy',
+        'version': MODEL_VERSION,
+        'model_loaded': model is not None
+        }
 
 @app.post('/predict')
 def predict_premium(data: UserInput):
